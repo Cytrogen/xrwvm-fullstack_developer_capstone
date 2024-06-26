@@ -15,7 +15,7 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from .populate import initiate
 from .models import CarMake, CarModel
-from .restapis import get_request, analyze_review_sentiments
+from .restapis import get_request, analyze_review_sentiments, post_review
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -88,9 +88,9 @@ def registration(request):
 
 
 def get_cars(request):
+    print(request)
     count = CarMake.objects.filter().count()
     print(count)
-    print(request)
     if count == 0:
         initiate()
     car_models = CarModel.objects.select_related('car_make')
@@ -106,10 +106,10 @@ def get_cars(request):
 # Update the `get_dealerships` render list of dealerships all by default,
 # particular state if state is passed
 def get_dealerships(request, state="All"):
+    print(request)
     if state == "All":
         endpoint = "/fetchDealers"
     else:
-        state = request.GET.get('state', 'All')
         endpoint = "/fetchDealers/" + state
     dealerships = get_request(endpoint)
     return JsonResponse({"status": 200, "dealers": dealerships})
@@ -145,9 +145,11 @@ def get_dealer_details(request, dealer_id):
 # Create a `add_review` view to submit a review
 def add_review(request):
     if not request.user.is_anonymous:
-        # data = json.loads(request.body)
+        data = json.loads(request.body)
+        print(data)
         try:
-            # response = post_review(data)
+            response = post_review(data)
+            print(response)
             return JsonResponse({"status": 200})
         except Exception as e:
             print(e)
